@@ -13,32 +13,34 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DirectionsService {
-	private GeoApiContext context = new GeoApiContext();
+    private GeoApiContext context = new GeoApiContext();
 
-	private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	@Autowired
-	public DirectionsService(@Value("${google.maps.key}") String apiKey) {
-		context.setApiKey(apiKey);
-	}
+    @Autowired
+    public DirectionsService(@Value("${google.maps.key}") String apiKey) {
+        context.setApiKey(apiKey);
+    }
 
-	/* TODO:  Update this method to pass the correct parameters to Google DirectionsAPI, and return a suitable response
-  	 * https://github.com/googlemaps/google-maps-services-java
-	 */
-	public void getDirections(Position origin, Position destination) {
-		logger.debug("origin: {}, destination: {}", origin, destination);
+    /* TODO:  Update this method to pass the correct parameters to Google DirectionsAPI, and return a suitable response
+       * https://github.com/googlemaps/google-maps-services-java
+     */
+    public DirectionsResult getDirections(Position origin, Position destination) {
+        logger.debug("origin: {}, destination: {}", origin, destination);
 
-		try {
-			DirectionsApiRequest request = DirectionsApi.newRequest(context);
-			// request.set...
+        try {
+            DirectionsApiRequest request = DirectionsApi.newRequest(context);
+            // request.set...
+            request.origin(origin.toString());
+            request.destination(destination.toString());
+            DirectionsResult googleResponse = request.await();
+            return googleResponse;
+            // ...
 
-			DirectionsResult googleResponse = request.await();
-			// ...
-
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 
 }

@@ -1,8 +1,11 @@
 package mobi.ingogo.interview.controller;
 
+import com.google.maps.model.DirectionsResult;
+import com.google.maps.model.EncodedPolyline;
 import mobi.ingogo.interview.dto.GeoPositionDto;
 import mobi.ingogo.interview.dto.RouteRequestDto;
 import mobi.ingogo.interview.dto.RouteResponseDto;
+import mobi.ingogo.interview.model.Position;
 import mobi.ingogo.interview.service.directions.DirectionsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,31 +21,36 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @RequestMapping(value = {"/api/geo"})
 public class GeoApiController {
 
-	@Autowired
-	private DirectionsService directionsService;
+    @Autowired
+    private DirectionsService directionsService;
 
-	private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	@RequestMapping(value = "/route", method = RequestMethod.POST)
-	public ResponseEntity<RouteResponseDto> route(@RequestBody RouteRequestDto request) {
+    @RequestMapping(value = "/route", method = RequestMethod.POST)
+    public ResponseEntity<RouteResponseDto> route(@RequestBody RouteRequestDto request) {
 
-		// TODO: Complete the DirectionsService class to return enough data to populate the RouteResponseDto
-		// directions = directionsService.getDirections(origin, destination);
+        // TODO: Complete the DirectionsService class to return enough data to populate the RouteResponseDto
+        Position origin = new Position(Double.valueOf(request.getPickup().getLatitude()), Double.valueOf(request.getPickup().getLongitude()));
+        Position destination = new Position(Double.valueOf(request.getDropoff().getLatitude()), Double.valueOf(request.getDropoff().getLongitude()));
 
-		RouteResponseDto response = new RouteResponseDto();
-		// TODO: Populate this response object with real data from directionsService
-		// e.g. to display a route on the map, set the encoded polyline
-		response.setEncodedPolyline("vx|lEmz_y[_BkV??kAlBi@hA??iChE??sDcD??qBsBkAaA??eBuAo@t@??gB|Ds@vB??mBhDa@rA??fAvAhAxA??tBhB~BfB??hCxBbB`B??}@tBmBpD??wBbEqCvF??aB`DkC~E??qBzDcBnD??wA~VqFqP??iApCoBxF??mAlE^bF??~@jFbAbH??]|DuBdG??mA`DiAhG??_@lDDzB??JTkAlB??");
+        DirectionsResult directions = directionsService.getDirections(origin, destination);
+        EncodedPolyline polyLine = directions.routes[0].overviewPolyline;
 
-		return new ResponseEntity<>(response, HttpStatus.OK);
-	}
+        RouteResponseDto response = new RouteResponseDto();
+        // TODO: Populate this response object with real data from directionsService
+        // e.g. to display a route on the map, set the encoded polyline
+        //response.setEncodedPolyline("vx|lEmz_y[_BkV??kAlBi@hA??iChE??sDcD??qBsBkAaA??eBuAo@t@??gB|Ds@vB??mBhDa@rA??fAvAhAxA??tBhB~BfB??hCxBbB`B??}@tBmBpD??wBbEqCvF??aB`DkC~E??qBzDcBnD??wA~VqFqP??iApCoBxF??mAlE^bF??~@jFbAbH??]|DuBdG??mA`DiAhG??_@lDDzB??JTkAlB??");
+        response.setEncodedPolyline(polyLine.getEncodedPath());
 
-	@RequestMapping(value = "/positionEcho", method = RequestMethod.POST)
-	public ResponseEntity<GeoPositionDto> position(@RequestBody GeoPositionDto position) {
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
-		logger.debug("Received position: {}, {}", position.getLatitude(), position.getLongitude());
+    @RequestMapping(value = "/positionEcho", method = RequestMethod.POST)
+    public ResponseEntity<GeoPositionDto> position(@RequestBody GeoPositionDto position) {
 
-		return new ResponseEntity<>(position, HttpStatus.OK);
-	}
+        logger.debug("Received position: {}, {}", position.getLatitude(), position.getLongitude());
+
+        return new ResponseEntity<>(position, HttpStatus.OK);
+    }
 
 }
