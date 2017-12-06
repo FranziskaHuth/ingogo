@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ingogo Coding Challenge</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.8/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.16.4/lodash.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-resource/1.2.1/vue-resource.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBzlLYISGjL_ovJwAehh6ydhB56fCCpPQw&libraries=geometry"></script>
+    <script src="js/vue-google-maps.js"></script>
+</head>
+
+<body>
+<div id="root">
+    <google-map :center="{lat:-33.864922, lng:151.204434}" :zoom="12" style="width: 100%; height: 800px;">
+
+        <google-marker v-for="marker in markers"
+                       :key="marker.id"
+                       :position="marker.position"
+                       :clickable="false"
+                       :draggable="true"
+                       :icon="marker.icon"
+                       @dragend="routeChanged($event, marker.id)">
+        </google-marker>
+
+        <google-polyline :path=routePath :editable="false" :draggable="false"
+                         :options="{geodesic:true, strokeColor:'#FF0000'}"
+                         @path_changed="updatePolylinePath($event)">
+        </google-polyline>
+
+    </google-map>
+</div>
+
+
+<script>
+    // https://github.com/xkjyeah/vue-google-maps/blob/HEAD/API.md
+    Vue.use(VueGoogleMaps, {
+        load: {
+            key: 'AIzaSyBzlLYISGjL_ovJwAehh6ydhB56fCCpPQw',
+            libraries: ['geometry'],
+        },
+        installComponents: true,
+    });
+
+    // https://github.com/pagekit/vue-resource
+    Vue.use(VueResource);
+
+    document.addEventListener('DOMContentLoaded', function () {
+        Vue.component('google-map', VueGoogleMaps.Map);
+        Vue.component('google-marker', VueGoogleMaps.Marker);
+        Vue.component('google-polyline', VueGoogleMaps.Polyline);
+        Vue.component('google-infowindow', VueGoogleMaps.InfoWindow);
+
+        var vue = new Vue({
+            el: '#root',
+            data: {
+                place: '',
+                destination: {},
+                routePath: [],
+                // vx|lEmz_y[_BkV??kAlBi@hA??iChE??sDcD??qBsBkAaA??eBuAo@t@??gB|Ds@vB??mBhDa@rA??fAvAhAxA??tBhB~BfB??hCxBbB`B??}@tBmBpD??wBbEqCvF??aB`DkC~E??qBzDcBnD??wA~VqFqP??iApCoBxF??mAlE^bF??~@jFbAbH??]|DuBdG??mA`DiAhG??_@lDDzB??JTkAlB??",
+                markers: {
+                    pickup: {
+                        id: "pickup",
+                        position: {
+                            lat: -33.919291,
+                            lng: 151.235481
+                        },
+                        icon: {
+                            url: "images/mkr-pickup.png",
+                            anchor: new window.google.maps.Point(20, 50)
+                        }
+                    },
+                    dropoff: {
+                        id: "dropoff",
+                        position: {
+                            lat: -33.864942,
+                            lng: 151.204772
+                        },
+                        icon: {
+                            url: "images/mkr-dropoff.png",
+                            anchor: new window.google.maps.Point(20, 50)
+                        }
+                    }
+                },
+                infoWindows: {
+                    pickup: {},
+                    dropoff: {}
+                }
+            },
+            methods: {
+                routeChanged(event, id) {
+                    // Call the route endpoint to get the directions, distance and ETA
+                    if (event && id) {
+                        this.markers[id].position.lat = event.latLng.lat();
+                        this.markers[id].position.lng = event.latLng.lng();
+                    }
+
+                    var model = this;
+
+                    var routeRequest = {
+                        "pickup": {
+                            "latitude": this.markers.pickup.position.lat,
+                            "longitude": this.markers.pickup.position.lng,
+                        },
+                        "dropoff": {
+                            "latitude": this.markers.dropoff.position.lat,
+                            "longitude": this.markers.dropoff.position.lng,
+                        },
+                    };
+
+                    // Call the /route endpoint to get the encoded polyline route, distance and time
+                    Vue.http.post('api/geo/route', routeRequest).then(function (response) {
+                        model.routePath = decodePath(response.data.encodedPolyline);
+                        console.log("Route info: ", response.data);
+                    }, function (error) {
+                        console.log(error.statusText);
+                    });
+
+
+//                    var locationRequest = {
+//                        "latitude": this.markers.pickup.position.lat,
+//                        "longitude": this.markers.pickup.position.lng,
+//                    };
+//
+//                    // Call the /geocode endpoint to get the suburb and street address
+//                    Vue.http.post('api/geo/locationInfo', locationRequest).then(function (response) {
+//                        console.log("Pickup info: ", response.data);
+//                    }, function (error) {
+//                        console.log(error.statusText);
+//                    });
+
+                }
+            }
+        });
+
+        vue.routeChanged();
+    });
+
+    // Converts an encoded polyline string into an array of Lat/Lng objects
+    function decodePath(encodedPolyline) {
+        var points = [];
+        var decodedPolyline = window.google.maps.geometry.encoding.decodePath(encodedPolyline);
+
+        _.forEach(decodedPolyline, function (point) {
+            points.push({lat: point.lat(), lng: point.lng()});
+        });
+
+        return points;
+    }
+</script>
+
+</body>
+
+</html>
