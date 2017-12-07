@@ -1,6 +1,7 @@
 package mobi.ingogo.interview.service.geocoder;
 
 import com.google.maps.errors.ApiException;
+import mobi.ingogo.interview.model.GeocodeResult;
 import mobi.ingogo.interview.model.Position;
 import org.junit.Assert;
 import org.junit.Before;

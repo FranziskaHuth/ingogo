@@ -1,4 +1,4 @@
-package mobi.ingogo.interview.service.geocoder;
+package mobi.ingogo.interview.model;
 
 public class GeocodeResult {
     private String suburb;

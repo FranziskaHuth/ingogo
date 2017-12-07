@@ -5,6 +5,7 @@ import com.google.maps.GeocodingApi;
 import com.google.maps.GeocodingApiRequest;
 import com.google.maps.errors.ApiException;
 import com.google.maps.model.*;
+import mobi.ingogo.interview.model.GeocodeResult;
 import mobi.ingogo.interview.model.Position;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
