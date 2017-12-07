@@ -28,9 +28,6 @@ public class DirectionsService {
         this.validator = validator;
     }
 
-    /* TODO:  Update this method to pass the correct parameters to Google DirectionsAPI, and return a suitable response
-       * https://github.com/googlemaps/google-maps-services-java
-     */
     public DirectionsResponse getDirections(Position origin, Position destination) {
         logger.debug("origin: {}, destination: {}", origin, destination);
 
