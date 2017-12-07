@@ -63,7 +63,10 @@ public class GeoApiController {
     public ResponseEntity<LocationInfoResponse> location(@RequestBody GeoPositionDto position) {
         try {
             GeocodeResult result = geocoderService.reverseGeocode(new Position(Double.valueOf(position.getLatitude()), Double.valueOf(position.getLongitude())));
-            LocationInfoResponse response = new LocationInfoResponse(result.getSuburb(), result.getStreetAdress());
+            LocationInfoResponse response = new LocationInfoResponse();
+            if(result!=null){
+                response = new LocationInfoResponse(result.getSuburb(), result.getStreetAdress());
+            }
             logger.info("locationInfo post response: " + response.toString());
 
             return new ResponseEntity<>(response, HttpStatus.OK);

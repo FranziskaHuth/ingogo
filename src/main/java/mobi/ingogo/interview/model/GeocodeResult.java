@@ -17,6 +17,9 @@ public class GeocodeResult {
 
 
     public String getSuburb() {
+        if (suburb == null) {
+            return "";
+        }
         return suburb;
     }
 
@@ -25,9 +28,12 @@ public class GeocodeResult {
     }
 
     public String getStreetAdress() {
-        if (streetNumber != null) {
+        if (streetNumber != null && streetName != null) {
             return streetNumber + " " + streetName;
         } else {
+            if (streetName == null) {
+                return "";
+            }
             return streetName;
         }
 

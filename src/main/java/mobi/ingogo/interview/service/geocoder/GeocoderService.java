@@ -31,7 +31,7 @@ public class GeocoderService {
         try {
             GeocodingResult[] response = request.await();
             if (response.length == 0) {
-                return new GeocodeResult();
+                return null;
             }
             //closest match is the first item
             GeocodingResult result = response[0];

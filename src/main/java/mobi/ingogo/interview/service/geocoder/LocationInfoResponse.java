@@ -8,6 +8,7 @@ public class LocationInfoResponse {
         this.suburb = suburb;
         this.streetAddress = streetAddress;
     }
+    public LocationInfoResponse(){}
 
     @Override
     public String toString() {
