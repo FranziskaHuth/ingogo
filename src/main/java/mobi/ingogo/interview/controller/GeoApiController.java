@@ -5,7 +5,7 @@ import com.google.maps.model.EncodedPolyline;
 import mobi.ingogo.interview.dto.GeoPositionDto;
 import mobi.ingogo.interview.dto.RouteRequestDto;
 import mobi.ingogo.interview.dto.RouteResponseDto;
-import mobi.ingogo.interview.model.Position;
+import mobi.ingogo.interview.model.error.ValidationError;
 import mobi.ingogo.interview.service.directions.DirectionsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,13 +27,10 @@ public class GeoApiController {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @RequestMapping(value = "/route", method = RequestMethod.POST)
-    public ResponseEntity<RouteResponseDto> route(@RequestBody RouteRequestDto request) {
+    public ResponseEntity<RouteResponseDto> route(@RequestBody RouteRequestDto request){
 
-        // TODO: Complete the DirectionsService class to return enough data to populate the RouteResponseDto
-        Position origin = new Position(Double.valueOf(request.getPickup().getLatitude()), Double.valueOf(request.getPickup().getLongitude()));
-        Position destination = new Position(Double.valueOf(request.getDropoff().getLatitude()), Double.valueOf(request.getDropoff().getLongitude()));
-
-        DirectionsResult directions = directionsService.getDirections(origin, destination);
+        directionsService.validateRoute(request);
+        DirectionsResult directions = directionsService.getDirections(directionsService.getPosition(request.getPickup()), directionsService.getPosition(request.getDropoff()));
         EncodedPolyline polyLine = directions.routes[0].overviewPolyline;
 
         RouteResponseDto response = new RouteResponseDto();

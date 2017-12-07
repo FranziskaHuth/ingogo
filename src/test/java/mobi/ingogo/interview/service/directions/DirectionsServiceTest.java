@@ -1,6 +1,7 @@
 package mobi.ingogo.interview.service.directions;
 
 import mobi.ingogo.interview.model.Position;
+import mobi.ingogo.interview.model.validation.RouteRequestDtoValidator;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -13,7 +14,7 @@ public class DirectionsServiceTest {
 
 	@Before
 	public void setUp() throws Exception {
-		directionsService = new DirectionsService("AIzaSyBzlLYISGjL_ovJwAehh6ydhB56fCCpPQw");
+		directionsService = new DirectionsService("AIzaSyBzlLYISGjL_ovJwAehh6ydhB56fCCpPQw",new RouteRequestDtoValidator());
 	}
 
 	@Test

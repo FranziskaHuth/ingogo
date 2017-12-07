@@ -4,7 +4,10 @@ import com.google.maps.DirectionsApi;
 import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
 import com.google.maps.model.DirectionsResult;
+import mobi.ingogo.interview.dto.GeoPositionDto;
+import mobi.ingogo.interview.dto.RouteRequestDto;
 import mobi.ingogo.interview.model.Position;
+import mobi.ingogo.interview.model.validation.RouteRequestDtoValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +19,12 @@ public class DirectionsService {
     private GeoApiContext context = new GeoApiContext();
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private RouteRequestDtoValidator validator;
 
     @Autowired
-    public DirectionsService(@Value("${google.maps.key}") String apiKey) {
+    public DirectionsService(@Value("${google.maps.key}") String apiKey, RouteRequestDtoValidator validator) {
         context.setApiKey(apiKey);
+        this.validator = validator;
     }
 
     /* TODO:  Update this method to pass the correct parameters to Google DirectionsAPI, and return a suitable response
@@ -43,4 +48,11 @@ public class DirectionsService {
     }
 
 
+    public Position getPosition(GeoPositionDto route) {
+        return new Position(Double.valueOf(route.getLatitude()), Double.valueOf(route.getLongitude()));
+    }
+
+    public void validateRoute(RouteRequestDto request) {
+        validator.validateRouteRequestDto(request);
+    }
 }
