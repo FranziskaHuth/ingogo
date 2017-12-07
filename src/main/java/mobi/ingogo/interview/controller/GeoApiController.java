@@ -35,19 +35,20 @@ public class GeoApiController {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @RequestMapping(value = "/route", method = RequestMethod.POST)
-    public ResponseEntity<RouteResponseDto> route(@RequestBody RouteRequestDto request)throws ValidationError {
+    public ResponseEntity<RouteResponseDto> route(@RequestBody RouteRequestDto request) throws ValidationError {
 
         directionsService.validateRoute(request);
         DirectionsResponse directions = directionsService.getDirections(directionsService.getPosition(request.getPickup()), directionsService.getPosition(request.getDropoff()));
 
         RouteResponseDto response = new RouteResponseDto();
-        response.setDistanceInKm(directions.getDistanceInKm());
-        response.setDurationInMinutes(directions.getDurationInMinutes());
-        response.setPickup(directions.getStartLocation());
-        response.setDropoff(directions.getEndLocation());
-        response.setEncodedPolyline(directions.getPolyLine().getEncodedPath());
+        if (directions != null) {
+            response.setDistanceInKm(directions.getDistanceInKm());
+            response.setDurationInMinutes(directions.getDurationInMinutes());
+            response.setPickup(directions.getStartLocation());
+            response.setDropoff(directions.getEndLocation());
+            response.setEncodedPolyline(directions.getPolyLine().getEncodedPath());
+        }
         logger.info("route post response: " + response.toString());
-
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -62,7 +63,7 @@ public class GeoApiController {
     public ResponseEntity<LocationInfoResponse> location(@RequestBody GeoPositionDto position) {
         try {
             GeocodeResult result = geocoderService.reverseGeocode(new Position(Double.valueOf(position.getLatitude()), Double.valueOf(position.getLongitude())));
-            LocationInfoResponse response= new LocationInfoResponse(result.getSuburb(),result.getStreetAdress());
+            LocationInfoResponse response = new LocationInfoResponse(result.getSuburb(), result.getStreetAdress());
             logger.info("locationInfo post response: " + response.toString());
 
             return new ResponseEntity<>(response, HttpStatus.OK);

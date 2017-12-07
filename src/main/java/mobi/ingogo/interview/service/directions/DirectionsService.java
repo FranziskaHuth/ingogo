@@ -36,7 +36,11 @@ public class DirectionsService {
             request.origin(origin.toString());
             request.destination(destination.toString());
             DirectionsResult googleResponse = request.await();
-            return createDirectionsResponse(googleResponse.routes[0]);
+            if (googleResponse.routes.length == 0) {
+                return null;
+            } else {
+                return createDirectionsResponse(googleResponse.routes[0]);
+            }
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -52,7 +56,7 @@ public class DirectionsService {
         end.setLatitude(String.valueOf(route.legs[0].endLocation.lat));
         end.setLongitude(String.valueOf(route.legs[0].endLocation.lng));
 
-        return new DirectionsResponse(route.overviewPolyline,route.legs[0].distance,route.legs[0].duration,  start,  end);
+        return new DirectionsResponse(route.overviewPolyline, route.legs[0].distance, route.legs[0].duration, start, end);
     }
 
 
