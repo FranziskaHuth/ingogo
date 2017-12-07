@@ -4,6 +4,7 @@ import com.google.maps.DirectionsApi;
 import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
 import com.google.maps.model.DirectionsResult;
+import com.google.maps.model.DirectionsRoute;
 import mobi.ingogo.interview.dto.GeoPositionDto;
 import mobi.ingogo.interview.dto.RouteRequestDto;
 import mobi.ingogo.interview.model.Position;
@@ -30,21 +31,31 @@ public class DirectionsService {
     /* TODO:  Update this method to pass the correct parameters to Google DirectionsAPI, and return a suitable response
        * https://github.com/googlemaps/google-maps-services-java
      */
-    public DirectionsResult getDirections(Position origin, Position destination) {
+    public DirectionsResponse getDirections(Position origin, Position destination) {
         logger.debug("origin: {}, destination: {}", origin, destination);
 
         try {
             DirectionsApiRequest request = DirectionsApi.newRequest(context);
-            // request.set...
             request.origin(origin.toString());
             request.destination(destination.toString());
             DirectionsResult googleResponse = request.await();
-            return googleResponse;
-            // ...
+            return createDirectionsResponse(googleResponse.routes[0]);
 
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private DirectionsResponse createDirectionsResponse(DirectionsRoute route) {
+        GeoPositionDto start = new GeoPositionDto();
+        start.setLatitude(String.valueOf(route.legs[0].startLocation.lat));
+        start.setLongitude(String.valueOf(route.legs[0].startLocation.lng));
+
+        GeoPositionDto end = new GeoPositionDto();
+        end.setLatitude(String.valueOf(route.legs[0].endLocation.lat));
+        end.setLongitude(String.valueOf(route.legs[0].endLocation.lng));
+
+        return new DirectionsResponse(route.overviewPolyline,route.legs[0].distance,route.legs[0].duration,  start,  end);
     }
 
 

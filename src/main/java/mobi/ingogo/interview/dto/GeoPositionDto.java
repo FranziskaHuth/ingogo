@@ -31,4 +31,13 @@ public class GeoPositionDto {
 	public void setAccuracy(int accuracy) {
 		this.accuracy = accuracy;
 	}
+
+	@Override
+	public String toString() {
+		return "GeoPositionDto{" +
+				"latitude='" + latitude + '\'' +
+				", longitude='" + longitude + '\'' +
+				", accuracy=" + accuracy +
+				'}';
+	}
 }

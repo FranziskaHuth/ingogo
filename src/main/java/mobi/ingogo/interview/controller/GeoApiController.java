@@ -1,11 +1,10 @@
 package mobi.ingogo.interview.controller;
 
-import com.google.maps.model.DirectionsResult;
-import com.google.maps.model.EncodedPolyline;
+
 import mobi.ingogo.interview.dto.GeoPositionDto;
 import mobi.ingogo.interview.dto.RouteRequestDto;
 import mobi.ingogo.interview.dto.RouteResponseDto;
-import mobi.ingogo.interview.model.error.ValidationError;
+import mobi.ingogo.interview.service.directions.DirectionsResponse;
 import mobi.ingogo.interview.service.directions.DirectionsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,17 +26,18 @@ public class GeoApiController {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @RequestMapping(value = "/route", method = RequestMethod.POST)
-    public ResponseEntity<RouteResponseDto> route(@RequestBody RouteRequestDto request){
+    public ResponseEntity<RouteResponseDto> route(@RequestBody RouteRequestDto request) {
 
         directionsService.validateRoute(request);
-        DirectionsResult directions = directionsService.getDirections(directionsService.getPosition(request.getPickup()), directionsService.getPosition(request.getDropoff()));
-        EncodedPolyline polyLine = directions.routes[0].overviewPolyline;
+        DirectionsResponse directions = directionsService.getDirections(directionsService.getPosition(request.getPickup()), directionsService.getPosition(request.getDropoff()));
 
         RouteResponseDto response = new RouteResponseDto();
-        // TODO: Populate this response object with real data from directionsService
-        // e.g. to display a route on the map, set the encoded polyline
-        //response.setEncodedPolyline("vx|lEmz_y[_BkV??kAlBi@hA??iChE??sDcD??qBsBkAaA??eBuAo@t@??gB|Ds@vB??mBhDa@rA??fAvAhAxA??tBhB~BfB??hCxBbB`B??}@tBmBpD??wBbEqCvF??aB`DkC~E??qBzDcBnD??wA~VqFqP??iApCoBxF??mAlE^bF??~@jFbAbH??]|DuBdG??mA`DiAhG??_@lDDzB??JTkAlB??");
-        response.setEncodedPolyline(polyLine.getEncodedPath());
+        response.setDistanceInKm(directions.getDistanceInKm());
+        response.setDurationInMinutes(directions.getDurationInMinutes());
+        response.setPickup(directions.getStartLocation());
+        response.setDropoff(directions.getEndLocation());
+        response.setEncodedPolyline(directions.getPolyLine().getEncodedPath());
+        logger.info("route post response: "+ response.toString());
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

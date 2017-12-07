@@ -49,4 +49,15 @@ public class RouteResponseDto {
 	public void setDistanceInKm(Double distanceInKm) {
 		this.distanceInKm = distanceInKm;
 	}
+
+	@Override
+	public String toString() {
+		return "RouteResponseDto{" +
+				"pickup=" + pickup +
+				", dropoff=" + dropoff +
+				", encodedPolyline='" + encodedPolyline + '\'' +
+				", durationInMinutes=" + durationInMinutes +
+				", distanceInKm=" + distanceInKm +
+				'}';
+	}
 }
