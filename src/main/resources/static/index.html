@@ -16,11 +16,15 @@
         <google-marker v-for="marker in markers"
                        :key="marker.id"
                        :position="marker.position"
-                       :clickable="false"
+                       :clickable="true"
                        :draggable="true"
                        :icon="marker.icon"
                        @dragend="routeChanged($event, marker.id)">
         </google-marker>
+
+        <gmap-info-window :options="infoWindows.pickup.options" :position="infoWindows.pickup.position" :opened="infoWindows.pickup.opened">
+            {{infoWindows.pickup.infoText}}
+        </gmap-info-window>
 
         <google-polyline :path=routePath :editable="false" :draggable="false"
                          :options="{geodesic:true, strokeColor:'#FF0000'}"
@@ -82,12 +86,24 @@
                     }
                 },
                 infoWindows: {
-                    pickup: {},
+                    pickup: {
+                        opened: false,
+                        infoText: "drag me...",
+                        options: {
+                            pixelOffset: {
+                                width: 0,
+                                height: -30
+                            }
+                        }, position: {
+                            lat: -33.919291,
+                            lng: 151.235481
+                        }
+                    },
                     dropoff: {}
                 }
             },
             methods: {
-                routeChanged(event, id) {
+               routeChanged(event, id) {
                     // Call the route endpoint to get the directions, distance and ETA
                     if (event && id) {
                         this.markers[id].position.lat = event.latLng.lat();
@@ -108,25 +124,47 @@
                     };
 
                     // Call the /route endpoint to get the encoded polyline route, distance and time
+                    var that = this;
                     Vue.http.post('api/geo/route', routeRequest).then(function (response) {
                         model.routePath = decodePath(response.data.encodedPolyline);
                         console.log("Route info: ", response.data);
+                        that.infoWindows.pickup.opened = true;
+                        if(id==="dropoff"){
+                            that.infoWindows.pickup.infoText = "Distance: " + response.data.distanceInKm + "km"+" Duration: " + response.data.durationInMinutes + " min";
+                            console.log(id);
+                            that.infoWindows.pickup.position={
+                                lat: that.markers[id].position.lat,
+                                lng: that.markers[id].position.lng
+                            };
+                        }
                     }, function (error) {
                         console.log(error.statusText);
                     });
 
 
-//                    var locationRequest = {
-//                        "latitude": this.markers.pickup.position.lat,
-//                        "longitude": this.markers.pickup.position.lng,
-//                    };
-//
-//                    // Call the /geocode endpoint to get the suburb and street address
-//                    Vue.http.post('api/geo/locationInfo', locationRequest).then(function (response) {
-//                        console.log("Pickup info: ", response.data);
-//                    }, function (error) {
-//                        console.log(error.statusText);
-//                    });
+                    var locationRequest = {
+                        "latitude": this.markers.pickup.position.lat,
+                        "longitude": this.markers.pickup.position.lng,
+                    };
+
+                    // Call the /geocode endpoint to get the suburb and street address
+
+                    Vue.http.post('api/geo/locationInfo', locationRequest).then(function (response) {
+                        console.log("Pickup info: ", response.data);
+                        that.infoWindows.pickup.opened = true;
+
+                        if(id === "pickup"){
+                            that.infoWindows.pickup.infoText = "From " + response.data.streetAddress + " " + response.data.suburb;
+
+                            console.log(id);
+                            that.infoWindows.pickup.position={
+                                lat: that.markers[id].position.lat,
+                                lng: that.markers[id].position.lng
+                            };
+                           }
+                    }, function (error) {
+                        console.log(error.statusText);
+                    });
 
                 }
             }
